@@ -15,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -47,9 +49,13 @@ public class InvoiceController {
 
         // TODO
         if(returnPdf) {
-            try {
+            try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
                 Document d = generatePdf(entities);
-            } catch (FileNotFoundException | DocumentException e) {
+                PdfWriter.getInstance(d, byteArrayOutputStream);
+                d.open();
+                byte[] documentBytes = byteArrayOutputStream.toByteArray();
+                d.close();
+            } catch (DocumentException | IOException e) {
                 return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }

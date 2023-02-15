@@ -34,6 +34,8 @@ public class InvoiceController {
             amountSum += product.getAmount();
         }
 
+        // TODO create pdf file
+
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM, amountSum);
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST, entities);

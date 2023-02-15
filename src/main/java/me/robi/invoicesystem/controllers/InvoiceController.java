@@ -56,10 +56,13 @@ public class InvoiceController {
     @GetMapping({"/invoice", "/invoice/pdf"})
     public ResponseEntity<Map<String, Object>> createInvoicePdf(@RequestParam long[] id) {
         ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
+
         if(jsonResponse.getStatusCode() != HttpStatus.OK)
             return jsonResponse;
+
         List<ProductEntity> entities = (List<ProductEntity>) jsonResponse.getBody().get(PRODUCTS_LIST);
         int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
+
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document d = generatePdf(entities);
             PdfWriter.getInstance(d, byteArrayOutputStream);
@@ -69,6 +72,7 @@ public class InvoiceController {
         } catch (DocumentException | IOException e) {
             return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
         return null; // TODO
     }
 

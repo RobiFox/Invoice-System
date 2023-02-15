@@ -6,7 +6,6 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import me.robi.invoicesystem.ResponseConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+
+import static me.robi.invoicesystem.ResponseConstants.InvoiceResponseConstants.*;
+import static me.robi.invoicesystem.ResponseConstants.*;
 
 @RestController
 @RequestMapping("/api")
@@ -38,15 +40,15 @@ public class InvoiceController {
         for(long l : id) {
             ProductEntity product = productRepository.findById(l).orElse(null);
             if(product == null)
-                return new ResponseEntity<>(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Product of ID %s not found.", l)), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Product of ID %s not found.", l)), HttpStatus.BAD_REQUEST);
             entities.add(product);
             amountSum += product.getAmount();
         }
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM, amountSum);
-        responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST, entities);
+        responseBody.put(PRODUCTS_SUM, amountSum);
+        responseBody.put(PRODUCTS_LIST, entities);
 
         return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
@@ -56,8 +58,8 @@ public class InvoiceController {
         ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
         if(jsonResponse.getStatusCode() != HttpStatus.OK)
             return jsonResponse;
-        List<ProductEntity> entities = (List<ProductEntity>) jsonResponse.getBody().get(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST);
-        int amountSum = (int) jsonResponse.getBody().get(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM);
+        List<ProductEntity> entities = (List<ProductEntity>) jsonResponse.getBody().get(PRODUCTS_LIST);
+        int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             Document d = generatePdf(entities);
             PdfWriter.getInstance(d, byteArrayOutputStream);
@@ -65,7 +67,7 @@ public class InvoiceController {
             byte[] documentBytes = byteArrayOutputStream.toByteArray();
             d.close();
         } catch (DocumentException | IOException e) {
-            return new ResponseEntity<>(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return null; // TODO
     }

@@ -50,7 +50,7 @@ public class InvoiceController {
             try {
                 Document d = generatePdf(entities);
             } catch (FileNotFoundException | DocumentException e) {
-                return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 

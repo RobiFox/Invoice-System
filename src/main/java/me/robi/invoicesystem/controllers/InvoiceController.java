@@ -1,5 +1,12 @@
 package me.robi.invoicesystem.controllers;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfWriter;
 import me.robi.invoicesystem.ResponseConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
@@ -8,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.*;
 
 @RestController
@@ -22,7 +31,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice")
-    public ResponseEntity createInvoice(@RequestParam long[] id) {
+    public ResponseEntity createInvoice(@RequestParam long[] id, @RequestParam(required = false) boolean returnPdf) {
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
 
@@ -34,12 +43,42 @@ public class InvoiceController {
             amountSum += product.getAmount();
         }
 
-        // TODO create pdf file
-
         Map<String, Object> responseBody = new HashMap<>();
+
+        // TODO
+        if(returnPdf) {
+            try {
+                Document d = generatePdf(entities);
+            } catch (FileNotFoundException | DocumentException e) {
+                return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM, amountSum);
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST, entities);
 
         return new ResponseEntity(responseBody, HttpStatus.OK);
+    }
+
+    // TODO
+    private Document generatePdf(List<ProductEntity> entities) throws FileNotFoundException, DocumentException {
+        Document document = new Document();
+        document.open();
+        PdfPTable table = new PdfPTable(2);
+        for(ProductEntity product : entities) {
+            {
+                PdfPCell cell = new PdfPCell();
+                cell.setPhrase(new Phrase(product.getName()));
+                table.addCell(cell);
+            }
+            {
+                PdfPCell cell = new PdfPCell();
+                cell.setPhrase(new Phrase(String.valueOf(product.getAmount())));
+                table.addCell(cell);
+            }
+        }
+        document.add(table);
+        document.close();
+        return document;
     }
 }

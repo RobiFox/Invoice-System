@@ -5,7 +5,6 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
 import me.robi.invoicesystem.ResponseConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,41 +30,46 @@ public class InvoiceController {
         return productRepository.findAll();
     }
 
-    @GetMapping("/invoice")
-    public ResponseEntity createInvoice(@RequestParam long[] id, @RequestParam(required = false) boolean returnPdf) {
+    @GetMapping("/invoice/json")
+    public ResponseEntity<Map<String, Object>> createInvoiceJson(@RequestParam long[] id) {
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
 
         for(long l : id) {
             ProductEntity product = productRepository.findById(l).orElse(null);
             if(product == null)
-                return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Product of ID %s not found.", l)), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Product of ID %s not found.", l)), HttpStatus.BAD_REQUEST);
             entities.add(product);
             amountSum += product.getAmount();
         }
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        // TODO
-        if(returnPdf) {
-            try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-                Document d = generatePdf(entities);
-                PdfWriter.getInstance(d, byteArrayOutputStream);
-                d.open();
-                byte[] documentBytes = byteArrayOutputStream.toByteArray();
-                d.close();
-            } catch (DocumentException | IOException e) {
-                return new ResponseEntity(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM, amountSum);
         responseBody.put(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST, entities);
 
-        return new ResponseEntity(responseBody, HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    // TODO
+    @GetMapping({"/invoice", "/invoice/pdf"})
+    public ResponseEntity<Map<String, Object>> createInvoicePdf(@RequestParam long[] id) {
+        ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
+        if(jsonResponse.getStatusCode() != HttpStatus.OK)
+            return jsonResponse;
+        List<ProductEntity> entities = (List<ProductEntity>) jsonResponse.getBody().get(ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST);
+        int amountSum = (int) jsonResponse.getBody().get(ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM);
+        try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            Document d = generatePdf(entities);
+            PdfWriter.getInstance(d, byteArrayOutputStream);
+            d.open();
+            byte[] documentBytes = byteArrayOutputStream.toByteArray();
+            d.close();
+        } catch (DocumentException | IOException e) {
+            return new ResponseEntity<>(Collections.singletonMap(ResponseConstants.RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return null; // TODO
+    }
+
     private Document generatePdf(List<ProductEntity> entities) throws FileNotFoundException, DocumentException {
         Document document = new Document();
         document.open();

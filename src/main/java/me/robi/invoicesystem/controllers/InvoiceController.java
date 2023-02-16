@@ -63,7 +63,7 @@ public class InvoiceController {
         int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
 
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Document d = generatePdf(entities, amountSum, byteArrayOutputStream);
+            generatePdf(entities, amountSum, byteArrayOutputStream);
             byte[] documentBytes = byteArrayOutputStream.toByteArray();
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
         } catch (DocumentException | IOException e) {

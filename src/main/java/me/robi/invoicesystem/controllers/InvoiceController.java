@@ -1,12 +1,10 @@
 package me.robi.invoicesystem.controllers;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Phrase;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import static me.robi.invoicesystem.ResponseConstants.InvoiceResponseConstants.*;
 import static me.robi.invoicesystem.ResponseConstants.*;
@@ -94,7 +93,12 @@ public class InvoiceController {
             }
         }
         document.add(table);
+
+        Chunk separator = new Chunk(new LineSeparator());
+        separator.setLineHeight(8f);
+        document.add(separator);
         document.close();
+
         return document;
     }
 }

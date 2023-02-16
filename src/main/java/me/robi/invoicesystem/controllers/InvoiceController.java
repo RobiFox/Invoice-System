@@ -10,11 +10,13 @@ import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -54,7 +56,7 @@ public class InvoiceController {
     }
 
     @GetMapping({"/invoice", "/invoice/pdf"})
-    public ResponseEntity<Map<String, Object>> createInvoicePdf(@RequestParam long[] id) {
+    public ResponseEntity createInvoicePdf(@RequestParam long[] id) {
         ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
 
         if(jsonResponse.getStatusCode() != HttpStatus.OK)
@@ -64,20 +66,18 @@ public class InvoiceController {
         int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
 
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Document d = generatePdf(entities);
-            PdfWriter.getInstance(d, byteArrayOutputStream);
-            d.open();
+            Document d = generatePdf(entities, byteArrayOutputStream);
             byte[] documentBytes = byteArrayOutputStream.toByteArray();
-            d.close();
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
         } catch (DocumentException | IOException e) {
             return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return null; // TODO
     }
 
-    private Document generatePdf(List<ProductEntity> entities) throws FileNotFoundException, DocumentException {
+    private Document generatePdf(List<ProductEntity> entities, ByteArrayOutputStream byteArrayOutputStream) throws FileNotFoundException, DocumentException {
         Document document = new Document();
+        PdfWriter.getInstance(document, byteArrayOutputStream);
+
         document.open();
         PdfPTable table = new PdfPTable(2);
         for(ProductEntity product : entities) {

@@ -2,6 +2,7 @@ package me.robi.invoicesystem.controllers;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -84,11 +85,14 @@ public class InvoiceController {
             {
                 PdfPCell cell = new PdfPCell();
                 cell.setPhrase(new Phrase(product.getName()));
+                cell.setBorder(0);
                 table.addCell(cell);
             }
             {
                 PdfPCell cell = new PdfPCell();
                 cell.setPhrase(new Phrase(String.valueOf(product.getAmount())));
+                cell.setBorder(0);
+                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                 table.addCell(cell);
             }
         }

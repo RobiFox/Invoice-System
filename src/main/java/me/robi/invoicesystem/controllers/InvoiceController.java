@@ -32,7 +32,7 @@ public class InvoiceController {
     }
 
     @GetMapping({"/invoice", "/invoice/json"})
-    public ResponseEntity<Map<String, Object>> createInvoiceJson(@RequestParam long[] id) {
+    public ResponseEntity<Map<String, Object>> createInvoiceBase(@RequestParam long[] id) {
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
 
@@ -54,13 +54,13 @@ public class InvoiceController {
 
     @GetMapping("/invoice/pdf")
     public ResponseEntity createInvoicePdf(@RequestParam long[] id) {
-        ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
+        ResponseEntity<Map<String, Object>> baseResponse = createInvoiceBase(id);
 
-        if(jsonResponse.getStatusCode() != HttpStatus.OK)
-            return jsonResponse;
+        if(baseResponse.getStatusCode() != HttpStatus.OK)
+            return baseResponse;
 
-        List<ProductEntity> entities = (List<ProductEntity>) jsonResponse.getBody().get(PRODUCTS_LIST);
-        int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
+        List<ProductEntity> entities = (List<ProductEntity>) baseResponse.getBody().get(PRODUCTS_LIST);
+        int amountSum = (int) baseResponse.getBody().get(PRODUCTS_SUM);
 
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             generatePdf(entities, amountSum, byteArrayOutputStream);

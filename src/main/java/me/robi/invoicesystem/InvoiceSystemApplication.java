@@ -18,6 +18,9 @@ public class InvoiceSystemApplication {
 		return (args -> {
 			repository.save(new ProductEntity("Item 1", 11));
 			repository.save(new ProductEntity("Item 2", 18));
+			repository.save(new ProductEntity("Item 3", 45));
+			repository.save(new ProductEntity("Item 4", 9));
+			repository.save(new ProductEntity("Item 5", 1));
 		});
 	}
 }

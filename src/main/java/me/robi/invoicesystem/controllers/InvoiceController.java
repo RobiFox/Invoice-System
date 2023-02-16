@@ -15,10 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import static me.robi.invoicesystem.ResponseConstants.InvoiceResponseConstants.*;
@@ -75,9 +72,9 @@ public class InvoiceController {
         }
     }
 
-    private Document generatePdf(List<ProductEntity> entities, ByteArrayOutputStream byteArrayOutputStream) throws FileNotFoundException, DocumentException {
+    private Document generatePdf(List<ProductEntity> entities, OutputStream outputStream) throws FileNotFoundException, DocumentException {
         Document document = new Document();
-        PdfWriter.getInstance(document, byteArrayOutputStream);
+        PdfWriter.getInstance(document, outputStream);
 
         document.open();
         PdfPTable table = new PdfPTable(2);

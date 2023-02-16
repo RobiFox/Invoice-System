@@ -39,7 +39,7 @@ public class InvoiceController {
         for(long l : id) {
             ProductEntity product = productRepository.findById(l).orElse(null);
             if(product == null)
-                return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Product of ID %s not found.", l)), HttpStatus.BAD_REQUEST);
+                return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Product of ID %s not found.", l)));
             entities.add(product);
             amountSum += product.getAmount();
         }
@@ -49,7 +49,7 @@ public class InvoiceController {
         responseBody.put(PRODUCTS_SUM, amountSum);
         responseBody.put(PRODUCTS_LIST, entities);
 
-        return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping({"/invoice", "/invoice/pdf"})
@@ -67,7 +67,7 @@ public class InvoiceController {
             byte[] documentBytes = byteArrayOutputStream.toByteArray();
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
         } catch (DocumentException | IOException e) {
-            return new ResponseEntity<>(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
         }
     }
 

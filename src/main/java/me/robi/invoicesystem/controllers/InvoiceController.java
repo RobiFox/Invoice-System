@@ -63,7 +63,7 @@ public class InvoiceController {
         int amountSum = (int) jsonResponse.getBody().get(PRODUCTS_SUM);
 
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            Document d = generatePdf(entities, byteArrayOutputStream);
+            Document d = generatePdf(entities, amountSum, byteArrayOutputStream);
             byte[] documentBytes = byteArrayOutputStream.toByteArray();
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
         } catch (DocumentException | IOException e) {
@@ -71,18 +71,27 @@ public class InvoiceController {
         }
     }
 
-    private Document generatePdf(List<ProductEntity> entities, OutputStream outputStream) throws FileNotFoundException, DocumentException {
+    private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);
 
         document.open();
-        PdfPTable table = new PdfPTable(2);
-        entities.forEach(product -> addCellsToTable(table, product));
-        document.add(table);
+        {
+            PdfPTable table = new PdfPTable(2);
+            entities.forEach(product -> addCellsToTable(table, product));
+            document.add(table);
+        }
 
         Chunk separator = new Chunk(new LineSeparator());
         separator.setLineHeight(8f);
         document.add(separator);
+
+        {
+            PdfPTable table = new PdfPTable(2);
+            addCellsToTable(table, "Total Sum", String.valueOf(totalSum));
+            document.add(table);
+        }
+
         document.close();
 
         return document;

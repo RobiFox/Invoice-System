@@ -77,21 +77,7 @@ public class InvoiceController {
 
         document.open();
         PdfPTable table = new PdfPTable(2);
-        for(ProductEntity product : entities) {
-            {
-                PdfPCell cell = new PdfPCell();
-                cell.setPhrase(new Phrase(product.getName()));
-                cell.setBorder(0);
-                table.addCell(cell);
-            }
-            {
-                PdfPCell cell = new PdfPCell();
-                cell.setPhrase(new Phrase(String.valueOf(product.getAmount())));
-                cell.setBorder(0);
-                cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                table.addCell(cell);
-            }
-        }
+        entities.forEach(product -> addCellsToTable(table, product));
         document.add(table);
 
         Chunk separator = new Chunk(new LineSeparator());
@@ -100,5 +86,27 @@ public class InvoiceController {
         document.close();
 
         return document;
+    }
+
+
+    private void addCellsToTable(PdfPTable table, ProductEntity product) {
+        addCellsToTable(table, product.getName(), String.valueOf(product.getAmount()));
+    }
+
+    private void addCellsToTable(PdfPTable table, String key, String value) {
+        if(table.getNumberOfColumns() != 2) throw new IllegalArgumentException("Table Column Count is not 2.");
+        {
+            PdfPCell cell = new PdfPCell();
+            cell.setPhrase(new Phrase(key));
+            cell.setBorder(0);
+            table.addCell(cell);
+        }
+        {
+            PdfPCell cell = new PdfPCell();
+            cell.setPhrase(new Phrase(String.valueOf(value)));
+            cell.setBorder(0);
+            cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            table.addCell(cell);
+        }
     }
 }

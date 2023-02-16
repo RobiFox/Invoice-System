@@ -31,7 +31,7 @@ public class InvoiceController {
         return productRepository.findAll();
     }
 
-    @GetMapping("/invoice/json")
+    @GetMapping({"/invoice", "/invoice/json"})
     public ResponseEntity<Map<String, Object>> createInvoiceJson(@RequestParam long[] id) {
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
@@ -52,7 +52,7 @@ public class InvoiceController {
         return ResponseEntity.ok(responseBody);
     }
 
-    @GetMapping({"/invoice", "/invoice/pdf"})
+    @GetMapping("/invoice/pdf")
     public ResponseEntity createInvoicePdf(@RequestParam long[] id) {
         ResponseEntity<Map<String, Object>> jsonResponse = createInvoiceJson(id);
 

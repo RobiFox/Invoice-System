@@ -88,7 +88,7 @@ public class InvoiceController {
 
         {
             PdfPTable table = new PdfPTable(2);
-            addCellsToTable(table, "Total Sum", String.valueOf(totalSum));
+            addCellsToTable(table, "Total Sum", totalSum);
             document.add(table);
         }
 
@@ -102,7 +102,7 @@ public class InvoiceController {
         addCellsToTable(table, product.getName(), String.valueOf(product.getAmount()));
     }
 
-    private void addCellsToTable(PdfPTable table, String key, String value) {
+    private void addCellsToTable(PdfPTable table, String key, Object value) {
         if(table.getNumberOfColumns() != 2) throw new IllegalArgumentException("Table Column Count is not 2.");
         {
             PdfPCell cell = new PdfPCell();

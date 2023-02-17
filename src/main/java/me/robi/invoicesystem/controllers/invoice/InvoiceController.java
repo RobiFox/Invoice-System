@@ -1,4 +1,4 @@
-package me.robi.invoicesystem.controllers;
+package me.robi.invoicesystem.controllers.invoice;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;

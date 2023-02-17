@@ -51,7 +51,6 @@ public class ProductEntity {
         ProductEntity entity = (ProductEntity) o;
         return id == entity.id && amount == entity.amount && name.equals(entity.name);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(id, name, amount);

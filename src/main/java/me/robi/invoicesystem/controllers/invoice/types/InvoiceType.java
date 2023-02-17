@@ -13,8 +13,5 @@ public abstract class InvoiceType {
     public static final String RAW_INVOICE = "raw";
     public static final String PDF_INVOICE = "pdf";
 
-    @Autowired
-    private ProductRepository productRepository;
-
     public abstract ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum);
 }

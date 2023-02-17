@@ -5,6 +5,9 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import me.robi.invoicesystem.PathConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
@@ -53,7 +59,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice/pdf")
-    public ResponseEntity createInvoicePdf(@RequestParam long[] id) {
+    public ResponseEntity createInvoicePdf(HttpServletResponse httpServletResponse, HttpServletRequest request, @RequestParam long[] id) {
         ResponseEntity<Map<String, Object>> baseResponse = createInvoiceBase(id);
 
         if(baseResponse.getStatusCode() != HttpStatus.OK)
@@ -61,14 +67,28 @@ public class InvoiceController {
 
         List<ProductEntity> entities = (List<ProductEntity>) baseResponse.getBody().get(PRODUCTS_LIST);
         int amountSum = (int) baseResponse.getBody().get(PRODUCTS_SUM);
+        int hashCode = entities.hashCode();
+        String fileName = String.format("%s.pdf", hashCode);
+        Path storagePath = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
 
-        try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            generatePdf(entities, amountSum, byteArrayOutputStream);
-            byte[] documentBytes = byteArrayOutputStream.toByteArray();
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
-        } catch (DocumentException | IOException e) {
-            return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
-        }
+        if(!Files.exists(storagePath))
+            try(FileOutputStream fileOutputStream = new FileOutputStream(new File(storagePath.toUri()))) {
+                generatePdf(entities, amountSum, fileOutputStream);
+            } catch (DocumentException | IOException e) {
+                return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
+            }
+
+        return ResponseEntity.ok().body(Collections.singletonMap(
+                REDIRECT_URL,
+                String.format("%s/access-pdf/%s",
+                        request.getRequestURL().toString().replaceAll("https?://", "").split("/")[0],
+                        fileName)
+        ));
+    }
+
+    @GetMapping("access-pdf/{file}")
+    public ResponseEntity accessPdf(@RequestParam String file) {
+        return null;
     }
 
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {

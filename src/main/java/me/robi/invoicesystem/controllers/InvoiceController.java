@@ -91,6 +91,8 @@ public class InvoiceController {
     public ResponseEntity accessPdf(@PathVariable(value = "file") String fileName) {
         if(!fileName.endsWith(".pdf"))
             fileName = fileName + ".pdf";
+        if(!verifyFileName(fileName))
+            return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, "Illegal file access"));
 
         Path path = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
 
@@ -102,6 +104,14 @@ public class InvoiceController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
         }
+    }
+
+    public boolean verifyFileName(String fileName) {
+        return verifyFileName(fileName, "\\w+");
+    }
+
+    public boolean verifyFileName(String fileName, String fileExtensionRegex) {
+        return fileName.matches("\\w+\\." + fileExtensionRegex);
     }
 
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {

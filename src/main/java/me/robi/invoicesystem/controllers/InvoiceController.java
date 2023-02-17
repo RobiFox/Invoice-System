@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -80,9 +81,9 @@ public class InvoiceController {
 
         return ResponseEntity.ok().body(Collections.singletonMap(
                 REDIRECT_URL,
-                String.format("%s/api/access-pdf/%s",
-                        request.getRequestURL().toString().replaceAll("https?://", "").split("/")[0],
-                        fileName)
+                UriComponentsBuilder.fromUriString(request.getRequestURL().toString())
+                        .replacePath("/api/access-pdf/" + fileName)
+                        .build().toString()
         ));
     }
 

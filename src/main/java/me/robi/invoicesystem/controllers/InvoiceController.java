@@ -119,7 +119,7 @@ public class InvoiceController {
         return fileName.matches("[\\w\\-_]+" + (fileExtensionRegex.length() > 0 ? "\\.\\w+" : ""));
     }
 
-    private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {
+    private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);
 

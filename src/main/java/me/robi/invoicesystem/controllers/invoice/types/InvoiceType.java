@@ -2,6 +2,7 @@ package me.robi.invoicesystem.controllers.invoice.types;
 
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -11,9 +12,12 @@ public abstract class InvoiceType {
     private List<ProductEntity> entities;
     private int totalSum;
 
+    @Autowired
+    private ProductRepository productRepository;
+
     public abstract ResponseEntity getResponse();
 
-    public InvoiceType(ProductRepository productRepository, long[] id) {
+    public InvoiceType(long[] id) {
         entities = new ArrayList<>();
         totalSum = 0;
 

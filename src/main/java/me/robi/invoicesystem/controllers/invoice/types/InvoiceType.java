@@ -5,15 +5,13 @@ import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
-import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 
 public abstract class InvoiceType {
     private List<ProductEntity> entities;
     private int totalSum;
+
+    public abstract ResponseEntity getResponse();
 
     public InvoiceType(ProductRepository productRepository, long[] id) {
         entities = new ArrayList<>();

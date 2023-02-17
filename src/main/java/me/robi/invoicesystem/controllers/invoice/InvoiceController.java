@@ -14,11 +14,9 @@ import me.robi.invoicesystem.controllers.invoice.types.RawInvoiceType;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -27,7 +25,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
-import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.*;
 import static me.robi.invoicesystem.constants.ResponseConstants.*;
 
 /**

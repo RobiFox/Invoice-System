@@ -24,7 +24,20 @@ import java.util.List;
 import static me.robi.invoicesystem.constants.ResponseConstants.REDIRECT_URL;
 import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 
+/**
+ * An Invoice Type that generates a PDF file
+ * and saves it at {@link PathConstants#PDF_FILE_STORAGE},
+ * returning an URL path to it.
+ */
 public class PdfInvoiceType extends InvoiceType {
+    /**
+     * Returns link to the PDF file. If an exact file
+     * like that doesn't exist yet, it creates another one.
+     * @param request HttpServletRequest provided by Spring
+     * @param entities List of all entities
+     * @param totalSum Total sum of the entities amount
+     * @return Link to access the PDF file
+     */
     @Override
     public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
         int hashCode = entities.hashCode();
@@ -46,6 +59,14 @@ public class PdfInvoiceType extends InvoiceType {
         ));
     }
 
+    /**
+     * Generates the PDF file, and writes it into an OutputStream
+     * @param entities List of all entities
+     * @param totalSum Their total sum
+     * @param outputStream The OutputStrea to write into
+     * @return The finished, closed Document
+     * @throws DocumentException An exception regarding Document should it happen
+     */
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);

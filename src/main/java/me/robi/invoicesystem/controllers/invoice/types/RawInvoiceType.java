@@ -11,7 +11,17 @@ import java.util.Map;
 import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.PRODUCTS_LIST;
 import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.PRODUCTS_SUM;
 
+/**
+ * A Response Type that doesn't do anything specific when queried
+ */
 public class RawInvoiceType extends InvoiceType {
+    /**
+     * Returns raw data of values
+     * @param request HttpServletRequest provided by Spring
+     * @param entities List of all entities
+     * @param totalSum Total sum of the entities amount
+     * @return The raw data
+     */
     @Override
     public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
         Map<String, Object> responseBody = new HashMap<>();

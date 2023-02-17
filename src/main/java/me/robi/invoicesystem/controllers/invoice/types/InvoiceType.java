@@ -1,4 +1,4 @@
-package me.robi.invoicesystem.controllers.invoice;
+package me.robi.invoicesystem.controllers.invoice.types;
 
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;

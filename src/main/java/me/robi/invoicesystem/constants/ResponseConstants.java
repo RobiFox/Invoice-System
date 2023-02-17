@@ -1,5 +1,9 @@
 package me.robi.invoicesystem.constants;
 
+/**
+ * A list of global response keys used when returning a ResponseEntity.
+ * Also contains a subclass that has keys specific to controllers.
+ */
 public class ResponseConstants {
     public static final String RESPONSE_STATUS = "status";
     public static final String REDIRECT_URL = "redirectUrl";

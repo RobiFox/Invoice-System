@@ -27,7 +27,7 @@ import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 /**
  * An Invoice Type that generates a PDF file
  * and saves it at {@link PathConstants#PDF_FILE_STORAGE},
- * returning an URL path to it.
+ * returning a URL path to it.
  */
 public class PdfInvoiceType extends InvoiceType {
     /**

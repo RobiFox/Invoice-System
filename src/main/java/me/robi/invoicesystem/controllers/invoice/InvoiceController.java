@@ -8,6 +8,9 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import me.robi.invoicesystem.constants.PathConstants;
+import me.robi.invoicesystem.controllers.invoice.types.InvoiceType;
+import me.robi.invoicesystem.controllers.invoice.types.PdfInvoiceType;
+import me.robi.invoicesystem.controllers.invoice.types.RawInvoiceType;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +36,23 @@ public class InvoiceController {
     @Autowired
     public ProductRepository productRepository;
 
+    public static final HashMap<String, InvoiceType> INVOICE_TYPES = new HashMap<>();
+    static {
+        INVOICE_TYPES.put(InvoiceType.RAW_INVOICE, new RawInvoiceType());
+        INVOICE_TYPES.put(InvoiceType.PDF_INVOICE, new PdfInvoiceType());
+    }
+
     @GetMapping("/products")
     public Iterable<ProductEntity> getProductRepository() {
         return productRepository.findAll();
     }
 
-    @GetMapping({"/invoice", "/invoice/json"})
-    public ResponseEntity<Map<String, Object>> createInvoiceBase(@RequestParam long[] id) {
+    @GetMapping({"/invoice", "/invoice/{type}"})
+    public ResponseEntity<Map<String, Object>> createInvoiceBase(HttpServletRequest request, @PathVariable(required = false, value = "type") String type, @RequestParam long[] id) {
+        if(type == null)
+            type = InvoiceType.RAW_INVOICE;
+
+        InvoiceType invoiceType = INVOICE_TYPES.get(type);
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
 
@@ -51,40 +64,7 @@ public class InvoiceController {
             amountSum += product.getAmount();
         }
 
-        Map<String, Object> responseBody = new HashMap<>();
-
-        responseBody.put(PRODUCTS_SUM, amountSum);
-        responseBody.put(PRODUCTS_LIST, entities);
-
-        return ResponseEntity.ok(responseBody);
-    }
-
-    @GetMapping("/invoice/pdf")
-    public ResponseEntity createInvoicePdf(HttpServletResponse httpServletResponse, HttpServletRequest request, @RequestParam long[] id) {
-        ResponseEntity<Map<String, Object>> baseResponse = createInvoiceBase(id);
-
-        if(baseResponse.getStatusCode() != HttpStatus.OK)
-            return baseResponse;
-
-        List<ProductEntity> entities = (List<ProductEntity>) baseResponse.getBody().get(PRODUCTS_LIST);
-        int amountSum = (int) baseResponse.getBody().get(PRODUCTS_SUM);
-        int hashCode = entities.hashCode();
-        String fileName = String.format("%s.pdf", hashCode);
-        Path storagePath = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
-
-        if(!Files.exists(storagePath))
-            try(FileOutputStream fileOutputStream = new FileOutputStream(new File(storagePath.toUri()))) {
-                generatePdf(entities, amountSum, fileOutputStream);
-            } catch (DocumentException | IOException e) {
-                return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
-            }
-
-        return ResponseEntity.ok().body(Collections.singletonMap(
-                REDIRECT_URL,
-                UriComponentsBuilder.fromUriString(request.getRequestURL().toString())
-                        .replacePath("/api/access-pdf/" + fileName)
-                        .build().toString()
-        ));
+        return invoiceType.getResponse(request, entities, amountSum);
     }
 
     @GetMapping("/access-pdf/{file}")

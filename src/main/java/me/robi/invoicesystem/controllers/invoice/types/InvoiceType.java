@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class InvoiceType {
+    public static final String RAW_INVOICE = "raw";
+    public static final String PDF_INVOICE = "pdf";
+
     @Autowired
     private ProductRepository productRepository;
 

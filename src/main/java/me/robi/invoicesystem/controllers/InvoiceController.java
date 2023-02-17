@@ -101,6 +101,12 @@ public class InvoiceController {
         ));
     }
 
+    /**
+     * Accesses the given file found in {@link PathConstants#PDF_FILE_STORAGE}, making
+     * sure it's a valid file with a .pdf extension.
+     * @param fileName Name of the file, with an optional .pdf extension at the end
+     * @return An error message if the file is missing, or on invalid file format (illegal characters), or the contents of the pdf file found in {@link PathConstants#PDF_FILE_STORAGE}/{@param fileName}
+     */
     @GetMapping("/access-pdf/{file}")
     public ResponseEntity accessPdf(@PathVariable(value = "file") String fileName) {
         if(!fileName.endsWith(".pdf"))
@@ -120,6 +126,12 @@ public class InvoiceController {
         }
     }
 
+    /**
+     * Verifies the validity of a file name from an user input.
+     * Calls {@link #verifyFileName(String, String)} with an automatically parsed file extension as the second parameter, if it exists.
+     * @param fileName The file name from user input
+     * @return {@code true} if the file doesn't contain illegal characters, {@code false} otherwise.
+     */
     public boolean verifyFileName(String fileName) {
         String extension = "";
         if(fileName.contains(".")) {
@@ -129,10 +141,25 @@ public class InvoiceController {
         return verifyFileName(fileName, extension);
     }
 
+    /**
+     * Verifies the validity of a file name from an user input.
+     * File name may only contain letters, hyphen or underscore, while the extension may only contain letters.
+     * @param fileName The file name from user input
+     * @param fileExtensionRegex The extension of the file
+     * @return {@code true} if the file doesn't contain illegal characters, {@code false} otherwise.
+     */
     public boolean verifyFileName(String fileName, String fileExtensionRegex) {
         return fileName.matches("\\w+" + (fileExtensionRegex.length() > 0 ? "\\.\\w+" : ""));
     }
 
+    /**
+     * Generates a PDF File given from the arguments
+     * @param entities List of entities to put into the document
+     * @param totalSum The number to put at the end of the document, after the seperator. It's the sum of all entities, calculated beforehand.
+     * @param outputStream The output stream to write the document to.
+     * @return The generated Document
+     * @throws DocumentException An exception regarding the Document.
+     */
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);

@@ -1,27 +1,15 @@
 package me.robi.invoicesystem.controllers.invoice;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import me.robi.invoicesystem.constants.PathConstants;
 import me.robi.invoicesystem.controllers.invoice.types.InvoiceType;
 import me.robi.invoicesystem.controllers.invoice.types.PdfInvoiceType;
 import me.robi.invoicesystem.controllers.invoice.types.RawInvoiceType;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
@@ -61,7 +49,7 @@ public class InvoiceController {
      * @return List of filtered products based on {@param id} and a response type of {@param type}.
      */
     @GetMapping({"/invoice", "/invoice/{type}"})
-    public ResponseEntity<Map<String, Object>> createInvoiceBase(HttpServletRequest request, @PathVariable(required = false, value = "type") String type, @RequestParam long[] id) {
+    public ResponseEntity<Map<String, Object>> createInvoice(HttpServletRequest request, @PathVariable(required = false, value = "type") String type, @RequestParam long[] id) {
         if(type == null)
             type = InvoiceType.RAW_INVOICE;
 

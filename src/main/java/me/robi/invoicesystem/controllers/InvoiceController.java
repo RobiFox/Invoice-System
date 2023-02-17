@@ -80,15 +80,27 @@ public class InvoiceController {
 
         return ResponseEntity.ok().body(Collections.singletonMap(
                 REDIRECT_URL,
-                String.format("%s/access-pdf/%s",
+                String.format("%s/api/access-pdf/%s",
                         request.getRequestURL().toString().replaceAll("https?://", "").split("/")[0],
                         fileName)
         ));
     }
 
-    @GetMapping("access-pdf/{file}")
-    public ResponseEntity accessPdf(@RequestParam String file) {
-        return null;
+    @GetMapping("/access-pdf/{file}")
+    public ResponseEntity accessPdf(@PathVariable(value = "file") String fileName) {
+        if(!fileName.endsWith(".pdf"))
+            fileName = fileName + ".pdf";
+
+        Path path = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
+
+        if(!Files.exists(path))
+            return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, String.format("File %s does not exist.", fileName)));
+
+        try {
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(Files.readAllBytes(path));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
+        }
     }
 
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {

@@ -27,17 +27,31 @@ import java.util.List;
 import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.*;
 import static me.robi.invoicesystem.constants.ResponseConstants.*;
 
+/**
+ * This class handles everything related to invoice
+ * and their generation.
+ */
 @RestController
 @RequestMapping("/api")
 public class InvoiceController {
     @Autowired
     public ProductRepository productRepository;
 
+    /**
+     * Lists all products that are available in the repository
+     * @return List of all products with all their fields.
+     */
     @GetMapping("/products")
     public Iterable<ProductEntity> getProductRepository() {
         return productRepository.findAll();
     }
 
+    /**
+     * Base method for filtering products based on an array of ID.
+     * Alternatively also returns them as a JSON if accessed via a GET request.
+     * @param id An array of longs, containing the specified IDs of products.
+     * @return List of filtered products based on {@param id}.
+     */
     @GetMapping({"/invoice", "/invoice/json"})
     public ResponseEntity<Map<String, Object>> createInvoiceBase(@RequestParam long[] id) {
         List<ProductEntity> entities = new ArrayList<>();

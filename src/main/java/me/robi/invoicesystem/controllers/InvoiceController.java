@@ -107,11 +107,11 @@ public class InvoiceController {
     }
 
     public boolean verifyFileName(String fileName) {
-        return verifyFileName(fileName, "\\w+");
+        return verifyFileName(fileName, fileName.contains(".") ? "\\w+" : "");
     }
 
     public boolean verifyFileName(String fileName, String fileExtensionRegex) {
-        return fileName.matches("\\w+\\." + fileExtensionRegex);
+        return fileName.matches("\\w+" + (fileExtensionRegex.length() > 0 || fileName.contains(".") ? "\\.\\w+" : ""));
     }
 
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {

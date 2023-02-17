@@ -10,3 +10,5 @@ Users can select specific invoices from a table and generate a PDF file from it 
   - `id` List of Product IDs that are selected.
 - `/api/invoice/pdf` Returns the invoice for the selected items as a PDF file.
   - `id` List of Product IDs that are selected.
+- `/api/access-pdf/{file}` Returns the PDF as stored on the server.
+  - `{file}` Name of the file. `.pdf` extension ending is optional 

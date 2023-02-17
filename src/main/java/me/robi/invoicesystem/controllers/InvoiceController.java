@@ -5,6 +5,9 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import me.robi.invoicesystem.PathConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
@@ -53,7 +60,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice/pdf")
-    public ResponseEntity createInvoicePdf(@RequestParam long[] id) {
+    public ResponseEntity createInvoicePdf(HttpServletResponse httpServletResponse, HttpServletRequest request, @RequestParam long[] id) {
         ResponseEntity<Map<String, Object>> baseResponse = createInvoiceBase(id);
 
         if(baseResponse.getStatusCode() != HttpStatus.OK)
@@ -61,14 +68,50 @@ public class InvoiceController {
 
         List<ProductEntity> entities = (List<ProductEntity>) baseResponse.getBody().get(PRODUCTS_LIST);
         int amountSum = (int) baseResponse.getBody().get(PRODUCTS_SUM);
+        int hashCode = entities.hashCode();
+        String fileName = String.format("%s.pdf", hashCode);
+        Path storagePath = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
 
-        try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            generatePdf(entities, amountSum, byteArrayOutputStream);
-            byte[] documentBytes = byteArrayOutputStream.toByteArray();
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(documentBytes);
-        } catch (DocumentException | IOException e) {
+        if(!Files.exists(storagePath))
+            try(FileOutputStream fileOutputStream = new FileOutputStream(new File(storagePath.toUri()))) {
+                generatePdf(entities, amountSum, fileOutputStream);
+            } catch (DocumentException | IOException e) {
+                return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
+            }
+
+        return ResponseEntity.ok().body(Collections.singletonMap(
+                REDIRECT_URL,
+                UriComponentsBuilder.fromUriString(request.getRequestURL().toString())
+                        .replacePath("/api/access-pdf/" + fileName)
+                        .build().toString()
+        ));
+    }
+
+    @GetMapping("/access-pdf/{file}")
+    public ResponseEntity accessPdf(@PathVariable(value = "file") String fileName) {
+        if(!fileName.endsWith(".pdf"))
+            fileName = fileName + ".pdf";
+        if(!verifyFileName(fileName))
+            return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, "Illegal file access"));
+
+        Path path = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
+
+        if(!Files.exists(path))
+            return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, String.format("File %s does not exist.", fileName)));
+
+        try {
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(Files.readAllBytes(path));
+        } catch (IOException e) {
             return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
         }
+    }
+
+    public boolean verifyFileName(String fileName) {
+        return verifyFileName(fileName, fileName.contains(".") ? "\\w+" : "");
+    }
+
+    public boolean verifyFileName(String fileName, String fileExtensionRegex) {
+        return fileName.matches("\\w+" + (fileExtensionRegex.length() > 0 || fileName.contains(".") ? "\\.\\w+" : ""));
     }
 
     private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws FileNotFoundException, DocumentException {

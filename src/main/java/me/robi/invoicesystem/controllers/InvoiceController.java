@@ -7,7 +7,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import me.robi.invoicesystem.PathConstants;
+import me.robi.invoicesystem.constants.PathConstants;
 import me.robi.invoicesystem.entities.ProductEntity;
 import me.robi.invoicesystem.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
-import static me.robi.invoicesystem.ResponseConstants.InvoiceResponseConstants.*;
-import static me.robi.invoicesystem.ResponseConstants.*;
+import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.*;
+import static me.robi.invoicesystem.constants.ResponseConstants.*;
 
 @RestController
 @RequestMapping("/api")

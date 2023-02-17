@@ -1,4 +1,4 @@
-package me.robi.invoicesystem;
+package me.robi.invoicesystem.constants;
 
 public class ResponseConstants {
     public static final String RESPONSE_STATUS = "status";

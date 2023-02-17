@@ -53,6 +53,10 @@ public class InvoiceController {
             type = InvoiceType.RAW_INVOICE;
 
         InvoiceType invoiceType = INVOICE_TYPES.get(type);
+
+        if(invoiceType == null)
+            return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Type %s does not exist.", type)));
+
         List<ProductEntity> entities = new ArrayList<>();
         int amountSum = 0;
 

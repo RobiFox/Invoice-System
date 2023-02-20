@@ -5,6 +5,7 @@ Users can select specific invoices from a table and generate a PDF file from it 
 
 ## Frontends
 - [React](https://github.com/RobiFox/Invoice-System-Frontend)
+- [Flutter](https://github.com/RobiFox/Invoice-System-Flutter)
 
 ## API
 - `/api/products` Lists all products in the database.

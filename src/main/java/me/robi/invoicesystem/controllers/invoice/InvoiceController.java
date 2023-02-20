@@ -25,6 +25,10 @@ public class InvoiceController {
     @Autowired
     public ProductRepository productRepository;
 
+    /**
+     * HashMap of all invoice types
+     * Key is the String identifier and the value is the response type object.
+     */
     public static final HashMap<String, InvoiceType> INVOICE_TYPES = new HashMap<>();
     static {
         INVOICE_TYPES.put(InvoiceType.RAW_INVOICE, new RawInvoiceType());

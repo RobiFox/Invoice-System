@@ -46,12 +46,10 @@ public class PdfInvoiceType extends InvoiceType {
      * @param request HttpServletRequest provided by Spring
      * @param entities List of all entities
      * @param totalSum Total sum of the entities amount
+     * @param fileName Name of the file.
      * @return Link to access the PDF file
      */
-    @Override
-    public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
-        int hashCode = entities.hashCode();
-        String fileName = String.format("%s.pdf", hashCode);
+    public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum, String fileName) {
         Path storagePath = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
 
         if(!Files.exists(storagePath))
@@ -70,6 +68,21 @@ public class PdfInvoiceType extends InvoiceType {
     }
 
     /**
+     * Returns link to the PDF file. If an exact file
+     * like that doesn't exist yet, it creates another one.
+     * @param request HttpServletRequest provided by Spring
+     * @param entities List of all entities
+     * @param totalSum Total sum of the entities amount
+     * @return Link to access the PDF file
+     */
+    @Override
+    public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
+        int hashCode = entities.hashCode();
+        String fileName = String.format("%s.pdf", hashCode);
+        return getResponse(request, entities, totalSum, fileName);
+    }
+
+    /**
      * Generates the PDF file, and writes it into an OutputStream
      * @param entities List of all entities
      * @param totalSum Their total sum
@@ -77,7 +90,7 @@ public class PdfInvoiceType extends InvoiceType {
      * @return The finished, closed Document
      * @throws DocumentException An exception regarding Document should it happen
      */
-    private Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws DocumentException {
+    public Document generatePdf(List<ProductEntity> entities, int totalSum, OutputStream outputStream) throws DocumentException {
         Document document = new Document();
         PdfWriter.getInstance(document, outputStream);
 

@@ -25,7 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static me.robi.invoicesystem.constants.PathConstants.PDF_FILE_STORAGE;
 import static me.robi.invoicesystem.constants.ResponseConstants.REDIRECT_URL;
 import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 
@@ -46,14 +48,12 @@ public class PdfInvoiceType extends InvoiceType {
      * @param request HttpServletRequest provided by Spring
      * @param entities List of all entities
      * @param totalSum Total sum of the entities amount
-     * @param fileName Name of the file.
+     * @param file The file reference
      * @return Link to access the PDF file
      */
-    public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum, String fileName) {
-        Path storagePath = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
-
-        if(!Files.exists(storagePath))
-            try(FileOutputStream fileOutputStream = new FileOutputStream(new File(storagePath.toUri()))) {
+    public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum, File file) {
+        if(!Files.exists(file.toPath()))
+            try(FileOutputStream fileOutputStream = new FileOutputStream(file)) {
                 generatePdf(entities, totalSum, fileOutputStream);
             } catch (DocumentException | IOException e) {
                 return ResponseEntity.internalServerError().body(Collections.singletonMap(RESPONSE_STATUS, String.format("Runtime Exception (%s): %s", e.getClass().getName(), e.getMessage())));
@@ -62,7 +62,7 @@ public class PdfInvoiceType extends InvoiceType {
         return ResponseEntity.ok().body(Collections.singletonMap(
                 REDIRECT_URL,
                 UriComponentsBuilder.fromUriString(request.getRequestURL().toString())
-                        .replacePath("/api/access-pdf/" + fileName)
+                        .replacePath("/api/access-pdf/" + file.getName())
                         .build().toString()
         ));
     }
@@ -79,7 +79,7 @@ public class PdfInvoiceType extends InvoiceType {
     public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
         int hashCode = entities.hashCode();
         String fileName = String.format("%s.pdf", hashCode);
-        return getResponse(request, entities, totalSum, fileName);
+        return getResponse(request, entities, totalSum, Paths.get(PDF_FILE_STORAGE, fileName).toFile());
     }
 
     /**
@@ -146,12 +146,23 @@ public class PdfInvoiceType extends InvoiceType {
      */
     @GetMapping("/access-pdf/{file}")
     public ResponseEntity accessPdf(@PathVariable(value = "file") String fileName) {
+        return accessPdf(fileName, PDF_FILE_STORAGE);
+    }
+
+    /**
+     * Accesses the given file found in {@link PathConstants#PDF_FILE_STORAGE}, making
+     * sure it's a valid file with a .pdf extension.
+     * @param fileName Name of the file, with an optional .pdf extension at the end
+     * @param directory The directory to look for.
+     * @return An error message if the file is missing, or on invalid file format (illegal characters), or the contents of the pdf file found in {@link PathConstants#PDF_FILE_STORAGE}/{@param fileName}
+     */
+    public ResponseEntity accessPdf(String fileName, String directory) {
         if(!fileName.endsWith(".pdf"))
             fileName = fileName + ".pdf";
         if(!verifyFileName(fileName))
             return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, "Illegal file access"));
 
-        Path path = Paths.get(PathConstants.PDF_FILE_STORAGE, fileName);
+        Path path = Paths.get(directory, fileName);
 
         if(!Files.exists(path))
             return ResponseEntity.badRequest().body(Collections.singletonMap(RESPONSE_STATUS, String.format("File %s does not exist.", fileName)));

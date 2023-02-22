@@ -2,8 +2,7 @@ package me.robi.invoicesystem;
 
 import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseConstants.*;
 import static me.robi.invoicesystem.constants.ResponseConstants.REDIRECT_URL;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -128,6 +127,7 @@ public class InvoiceControllerTest {
             ResponseEntity response = pdfInvoiceType.accessPdf(fileName, PathConstants.TEST_PDF_FILE_STORAGE);
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals(MediaType.APPLICATION_PDF, response.getHeaders().getContentType());
+            assertArrayEquals((byte[]) response.getBody(), Files.readAllBytes(f.toPath()));
         }
 
         FileUtils.deleteDirectory(p.toFile());

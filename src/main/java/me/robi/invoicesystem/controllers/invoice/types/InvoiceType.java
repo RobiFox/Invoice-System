@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 /**
- * An abstract class for handling different types of responses
+ * An interface for handling different types of responses
  */
 public interface InvoiceType {
     String RAW_INVOICE = "raw";

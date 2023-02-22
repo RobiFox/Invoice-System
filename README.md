@@ -22,3 +22,4 @@ Users can select specific invoices from a table and generate a PDF file from it 
 - The software is designed in a way to allow easy refactor and extension of the application.
 - As per the required task, the PDF file is saved to disk.
   -  In a [previous commit](https://github.com/RobiFox/Invoice-System/blob/a640ebeb4e09f6e705abecceef882ffa72cd6ed0/src/main/java/me/robi/invoicesystem/controllers/InvoiceController.java#L68), it was directly sent to the user, no saving on disk
+- [InvoiceType](https://github.com/RobiFox/Invoice-System/tree/master/src/main/java/me/robi/invoicesystem/controllers/invoice/types) used to be an Abstract Class, however an Interface seems more fit, because it contains only one method, no constructor necessarily, and interfaces with singular method can be inlined.

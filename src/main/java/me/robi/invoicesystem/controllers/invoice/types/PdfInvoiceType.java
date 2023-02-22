@@ -41,7 +41,7 @@ import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
  */
 @RestController
 @RequestMapping("/api")
-public class PdfInvoiceType extends InvoiceType {
+public class PdfInvoiceType implements InvoiceType {
     /**
      * Returns link to the PDF file. If an exact file
      * like that doesn't exist yet, it creates another one.

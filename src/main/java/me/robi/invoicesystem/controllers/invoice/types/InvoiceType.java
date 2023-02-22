@@ -9,9 +9,9 @@ import java.util.List;
 /**
  * An abstract class for handling different types of responses
  */
-public abstract class InvoiceType {
-    public static final String RAW_INVOICE = "raw";
-    public static final String PDF_INVOICE = "pdf";
+public interface InvoiceType {
+    String RAW_INVOICE = "raw";
+    String PDF_INVOICE = "pdf";
 
     /**
      * Handles response based on given type
@@ -20,5 +20,5 @@ public abstract class InvoiceType {
      * @param totalSum Total sum of the entities amount
      * @return Response in the given type
      */
-    public abstract ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum);
+    ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum);
 }

@@ -14,7 +14,7 @@ import static me.robi.invoicesystem.constants.ResponseConstants.InvoiceResponseC
 /**
  * A Response Type that doesn't do anything specific when queried
  */
-public class RawInvoiceType extends InvoiceType {
+public class RawInvoiceType implements InvoiceType {
     /**
      * Returns raw data of values
      * @param request HttpServletRequest provided by Spring

@@ -72,6 +72,7 @@ public class InvoiceControllerTest {
         List<ProductEntity> productEntities = Arrays.asList(new ObjectMapper().readValue(response.getResponse().getContentAsString(), ProductEntity[].class));
         assertEquals(productEntities.size(), 2);
         assertEquals(productEntities.get(0).getName(), "TestItem 1");
+        assertEquals(productEntities.get(1).getName(), "TestItem 2");
     }
 
     @Test

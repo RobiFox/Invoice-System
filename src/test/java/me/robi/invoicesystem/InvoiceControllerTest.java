@@ -113,14 +113,24 @@ public class InvoiceControllerTest {
         String fileName = "test.pdf";
 
         File f = Paths.get(PathConstants.TEST_PDF_FILE_STORAGE, fileName).toFile();
+
+        String redirectFileName;
         {
             ResponseEntity response = pdfInvoiceType.getResponse(new MockHttpServletRequest(), Arrays.asList(list.get(0), list.get(2)), sum, f);
             String[] redirectUrlSplit = ((Map) response.getBody()).get(REDIRECT_URL).toString().split("/");
-            String redirectFileName = redirectUrlSplit[redirectUrlSplit.length - 1];
+            redirectFileName = redirectUrlSplit[redirectUrlSplit.length - 1];
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertEquals(redirectFileName, fileName);
             assertTrue(f.exists());
+        }
+        
+        {
+            ResponseEntity response = pdfInvoiceType.getResponse(new MockHttpServletRequest(), Arrays.asList(list.get(0), list.get(2)), sum, f);
+            String[] redirectUrlSplit = ((Map) response.getBody()).get(REDIRECT_URL).toString().split("/");
+            String secondRedirectFileName = redirectUrlSplit[redirectUrlSplit.length - 1];
+
+            assertEquals(secondRedirectFileName, redirectFileName);
         }
 
         {

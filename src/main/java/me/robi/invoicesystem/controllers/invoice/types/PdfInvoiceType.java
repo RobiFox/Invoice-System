@@ -23,9 +23,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static me.robi.invoicesystem.constants.PathConstants.PDF_FILE_STORAGE;
 import static me.robi.invoicesystem.constants.ResponseConstants.REDIRECT_URL;
@@ -42,6 +41,8 @@ import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 @RestController
 @RequestMapping("/api")
 public class PdfInvoiceType implements InvoiceType {
+    private HashMap<List<ProductEntity>, UUID> fileNameCache = new HashMap<>();
+
     /**
      * Returns link to the PDF file. If an exact file
      * like that doesn't exist yet, it creates another one.
@@ -77,8 +78,8 @@ public class PdfInvoiceType implements InvoiceType {
      */
     @Override
     public ResponseEntity getResponse(HttpServletRequest request, List<ProductEntity> entities, int totalSum) {
-        int hashCode = entities.hashCode();
-        String fileName = String.format("%s.pdf", hashCode);
+        fileNameCache.putIfAbsent(entities, UUID.randomUUID());
+        String fileName = String.format("%s.pdf", fileNameCache.get(entities)).replace("-", "");
         return getResponse(request, entities, totalSum, Paths.get(PDF_FILE_STORAGE, fileName).toFile());
     }
 

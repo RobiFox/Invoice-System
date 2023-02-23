@@ -115,6 +115,7 @@ public class InvoiceControllerTest {
         File f = Paths.get(PathConstants.TEST_PDF_FILE_STORAGE, fileName).toFile();
 
         String redirectFileName;
+        // make sure file gets created
         {
             ResponseEntity response = pdfInvoiceType.getResponse(new MockHttpServletRequest(), Arrays.asList(list.get(0), list.get(2)), sum, f);
             String[] redirectUrlSplit = ((Map) response.getBody()).get(REDIRECT_URL).toString().split("/");
@@ -124,7 +125,7 @@ public class InvoiceControllerTest {
             assertEquals(redirectFileName, fileName);
             assertTrue(f.exists());
         }
-        
+        // make sure it returns the link that already exists if its queried a second time
         {
             ResponseEntity response = pdfInvoiceType.getResponse(new MockHttpServletRequest(), Arrays.asList(list.get(0), list.get(2)), sum, f);
             String[] redirectUrlSplit = ((Map) response.getBody()).get(REDIRECT_URL).toString().split("/");
@@ -132,7 +133,7 @@ public class InvoiceControllerTest {
 
             assertEquals(secondRedirectFileName, redirectFileName);
         }
-
+        // make sure the redirect url returns a valid file
         {
             ResponseEntity response = pdfInvoiceType.accessPdf(fileName, PathConstants.TEST_PDF_FILE_STORAGE);
             assertEquals(HttpStatus.OK, response.getStatusCode());

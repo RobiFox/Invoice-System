@@ -41,6 +41,10 @@ import static me.robi.invoicesystem.constants.ResponseConstants.RESPONSE_STATUS;
 @RestController
 @RequestMapping("/api")
 public class PdfInvoiceType implements InvoiceType {
+    /**
+     * Temporary cache to store for already existing files
+     * to prevent abuse of file creation.
+     */
     private HashMap<List<ProductEntity>, UUID> fileNameCache = new HashMap<>();
 
     /**
